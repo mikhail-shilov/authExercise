@@ -37,8 +37,13 @@ middleware.forEach((it) => server.use(it))
 server.get('/api/v1/cookies', (req, res) => {
   console.log(req.cookies)
   console.log(req.cookies.isLogged)
-  res.cookie('serverSide', 'Set!', { path: '/', maxAge: 60*60, httpOnly: true })
+  res.cookie('serverSide', 'Set!', { path: '/', maxAge: 60 * 60, httpOnly: true })
   res.json({ req: req.cookies, status: 'ok!' })
+})
+
+server.post('/api/v1/auth', (req, res) => {
+  console.log(req.body)
+  res.json({ body: req.body, status: 'ok!' })
 })
 
 server.use('/api/', (req, res) => {
