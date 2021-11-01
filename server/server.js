@@ -16,11 +16,16 @@ require('colors')
 
 let Root
 mongooseService.connect()
+/*
+This code is testing db opearationts. It's creatng new dummy-user.
+
 const user = new User({
-  email: 'test2@gmail.com',
-  password: 'abracadabra'
+email: 'test2@gmail.com',
+password: 'abracadabra'
 })
+
 user.save()
+*/
 
 try {
   // eslint-disable-next-line import/no-unresolved
