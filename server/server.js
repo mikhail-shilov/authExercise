@@ -7,14 +7,21 @@ import React from 'react'
 
 import cookieParser from 'cookie-parser'
 import mongooseService from './services/mongoose'
+import User from './model/User.model'
 
 import config from './config'
 import Html from '../client/html'
 
 require('colors')
-mongooseService.connect()
 
 let Root
+mongooseService.connect()
+const user = new User({
+  email: 'test2@gmail.com',
+  password: 'abracadabra'
+})
+user.save()
+
 try {
   // eslint-disable-next-line import/no-unresolved
   Root = require('../dist/assets/js/ssr/root.bundle').default
