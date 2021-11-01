@@ -9,6 +9,7 @@ import Home from '../components/home'
 import DummyView from '../components/dummy-view'
 import LoginForm from '../components/LoginForm'
 import NotFound from '../components/404'
+import PrivateComponent from '../components/private-route'
 
 import Startup from './startup'
 
@@ -23,20 +24,17 @@ const OnlyAnonymousRoute = ({ component: Component, ...rest }) => {
 }
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
-  const user = useSelector((state) => state.auth.user)
-  const token = useSelector((state) => state.token)
-
-  const func = (props) => {
-    if (!!user && !!user.name && !!token) return <Component {...props} />
-
-    return (
+  const auth = useSelector((s) => s.auth)
+  const func = (props) =>
+    !!auth.user && !!auth.token ? (
+      <Component {...props} />
+    ) : (
       <Redirect
         to={{
           pathname: '/login'
         }}
       />
     )
-  }
   return <Route {...rest} render={func} />
 }
 
@@ -51,7 +49,11 @@ const RootComponent = (props) => {
           <Switch>
             <Route exact path="/" component={DummyView} />
             <Route exact path="/auth" component={LoginForm} />
+            <OnlyAnonymousRoute exact path="/login" component={() => <LoginForm />} />
+
             <Route exact path="/dashboard" component={Home} />
+            <PrivateRoute exact path="/private" component={() => <PrivateComponent />} />
+
             <PrivateRoute exact path="/hidden-route" component={DummyView} />
             <OnlyAnonymousRoute exact path="/anonymous-route" component={DummyView} />
 

@@ -6,7 +6,11 @@ import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
 
 import cookieParser from 'cookie-parser'
+import passport from 'passport'
+
 import mongooseService from './services/mongoose'
+import passportJWT from './services/passport.js'
+import jwt from 'jsonwebtoken'
 import User from './model/User.model'
 
 import config from './config'
@@ -16,16 +20,17 @@ require('colors')
 
 let Root
 mongooseService.connect()
+
 /*
-This code is testing db opearationts. It's creatng new dummy-user.
+// This code is testing db opearationts. It's creatng new dummy-user.
 
 const user = new User({
-email: 'test2@gmail.com',
-password: 'abracadabra'
+email: 'test@test.com',
+password: 'test'
 })
 
 user.save()
-*/
+ */
 
 try {
   // eslint-disable-next-line import/no-unresolved
@@ -41,6 +46,7 @@ const server = express()
 
 const middleware = [
   cors(),
+  passport.initialize(),
   express.static(path.resolve(__dirname, '../dist/assets')),
   express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }),
   express.json({ limit: '50mb', extended: true }),
@@ -56,9 +62,44 @@ server.get('/api/v1/cookies', (req, res) => {
   res.json({ req: req.cookies, status: 'ok!' })
 })
 
-server.post('/api/v1/auth', (req, res) => {
+/* server.post('/api/v1/auth', (req, res) => {
   console.log(req.body)
   res.json({ body: req.body, status: 'ok!' })
+})
+ */
+
+server.post('/api/v1/auth', async (req, res) => {
+  console.log(req.body)
+  console.log(req.cookies)
+
+  try {
+    const user = await User.findAndValidateUser(req.body)
+
+    const payload = { uid: user.id }
+    const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
+    delete user.password
+    res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
+    res.json({ status: 'ok', token, user })
+  } catch (err) {
+    console.log(err)
+    res.json({ status: 'error', err })
+  }
+})
+
+server.get('/api/v1/auth', async (req, res) => {
+  try {
+    const jwtUser = jwt.verify(req.cookies.token, config.secret)
+    const user = await User.findById(jwtUser.uid)
+
+    const payload = { uid: user.id }
+    const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
+    delete user.password
+    res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
+    res.json({ status: 'ok', token, user })
+  } catch (err) {
+    console.log(err)
+    res.json({ status: 'error', err })
+  }
 })
 
 server.use('/api/', (req, res) => {
