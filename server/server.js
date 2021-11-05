@@ -69,9 +69,6 @@ server.get('/api/v1/cookies', (req, res) => {
  */
 
 server.post('/api/v1/auth', async (req, res) => {
-  console.log(req.body)
-  console.log(req.cookies)
-
   try {
     const user = await User.findAndValidateUser(req.body)
 

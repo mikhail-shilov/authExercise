@@ -47,6 +47,8 @@ const RootComponent = (props) => {
       <RouterSelector history={history} location={props.location} context={props.context}>
         <Startup>
           <Switch>
+            <OnlyAnonymousRoute exact path="/login" component={() => <LoginForm />} />
+
             <Route exact path="/" component={DummyView} />
             <Route exact path="/auth" component={LoginForm} />
             <OnlyAnonymousRoute exact path="/login" component={() => <LoginForm />} />

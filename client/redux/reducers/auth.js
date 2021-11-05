@@ -55,8 +55,10 @@ export function signIn() {
 export function trySignIn() {
   return (dispatch) => {
     fetch('/api/v1/auth')
-      .then((r) => r.json())
+      .then((responce) => responce.json())
       .then((data) => {
+        console.log('trySignIn')
+        console.log(data)
         dispatch({ type: LOGIN, token: data.token, user: data.user })
         history.push('/private')
       })
