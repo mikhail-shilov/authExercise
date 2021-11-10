@@ -32,6 +32,7 @@ export default (state = initialState, action) => {
 
 export const updateLoginField = (email) => ({ type: UPDATE_LOGIN, email })
 export const updatePasswordField = (password) => ({ type: UPDATE_PASSWORD, password })
+
 export function signIn() {
   return (dispatch, getState) => {
     const { email, password } = getState().auth
@@ -45,6 +46,17 @@ export function signIn() {
         password
       })
     })
+      .then((response) => response.json())
+      .then((data) => {
+        dispatch({ type: LOGIN, token: data.token, user: data.user })
+        history.push('/private')
+      })
+  }
+}
+
+export function trySignIn() {
+  return (dispatch) => {
+    fetch('/api/v1/auth')
       .then((responce) => responce.json())
       .then((data) => {
         dispatch({ type: LOGIN, token: data.token, user: data.user })
@@ -52,15 +64,13 @@ export function signIn() {
       })
   }
 }
-export function trySignIn() {
-  return (dispatch) => {
-    fetch('/api/v1/auth')
-      .then((responce) => responce.json())
+
+export function tryUserInfo() {
+  return () => {
+    fetch('/api/v1/user-info')
+      .then((response) => response.json())
       .then((data) => {
-        console.log('trySignIn')
         console.log(data)
-        dispatch({ type: LOGIN, token: data.token, user: data.user })
-        history.push('/private')
       })
   }
 }

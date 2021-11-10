@@ -7,11 +7,13 @@ import React from 'react'
 
 import cookieParser from 'cookie-parser'
 import passport from 'passport'
+import jwt from 'jsonwebtoken'
+import passportJWT from './services/passport'
+import auth from './middleware/auth'
 
 import mongooseService from './services/mongoose'
-import passportJWT from './services/passport.js'
-import jwt from 'jsonwebtoken'
 import User from './model/User.model'
+
 
 import config from './config'
 import Html from '../client/html'
@@ -22,7 +24,7 @@ let Root
 mongooseService.connect()
 
 /*
-// This code is testing db opearationts. It's creatng new dummy-user.
+// This code is testing db operations. It's creating new dummy-user.
 
 const user = new User({
 email: 'test@test.com',
@@ -52,17 +54,18 @@ const middleware = [
   express.json({ limit: '50mb', extended: true }),
   cookieParser()
 ]
+passport.use('jwt', passportJWT.jwt)
 
 middleware.forEach((it) => server.use(it))
 
 server.get('/api/v1/cookies', (req, res) => {
-  console.log(req.cookies)
-  console.log(req.cookies.isLogged)
   res.cookie('serverSide', 'Set!', { path: '/', maxAge: 60 * 60, httpOnly: true })
   res.json({ req: req.cookies, status: 'ok!' })
 })
 
-/* server.post('/api/v1/auth', (req, res) => {
+/*
+// Simple testing api.
+server.post('/api/v1/auth', (req, res) => {
   console.log(req.body)
   res.json({ body: req.body, status: 'ok!' })
 })
@@ -70,11 +73,10 @@ server.get('/api/v1/cookies', (req, res) => {
 
 server.post('/api/v1/auth', async (req, res) => {
   try {
-    const user = await User.findAndValidateUser(req.body)
-
-    const payload = { uid: user.id }
+    const userRecord = await User.findAndValidateUser(req.body)
+    const payload = { uid: userRecord.id }
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
-    delete user.password
+    const user = { id: userRecord.id, email: userRecord.email }
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
@@ -86,17 +88,23 @@ server.post('/api/v1/auth', async (req, res) => {
 server.get('/api/v1/auth', async (req, res) => {
   try {
     const jwtUser = jwt.verify(req.cookies.token, config.secret)
-    const user = await User.findById(jwtUser.uid)
-
-    const payload = { uid: user.id }
+    const userRecord = await User.findById(jwtUser.uid)
+    const payload = { uid: userRecord.id }
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
-    delete user.password
+    // const { password, ...user } = userRecord
+    const user = { id: userRecord.id, email: userRecord.email }
+    console.log(user)
+    console.log(user)
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
     console.log(err)
     res.json({ status: 'error', err })
   }
+})
+
+server.get('/api/v1/user-info', auth(['user']), (req, res) => {
+  res.json({ status: 'pass' })
 })
 
 server.use('/api/', (req, res) => {
@@ -135,7 +143,8 @@ if (config.isSocketsEnabled) {
   const echo = sockjs.createServer()
   echo.on('connection', (conn) => {
     connections.push(conn)
-    conn.on('data', async () => {})
+    conn.on('data', async () => {
+    })
 
     conn.on('close', () => {
       connections = connections.filter((c) => c.readyState !== 3)

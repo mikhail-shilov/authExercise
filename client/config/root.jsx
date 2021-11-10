@@ -9,7 +9,7 @@ import Home from '../components/home'
 import DummyView from '../components/dummy-view'
 import LoginForm from '../components/LoginForm'
 import NotFound from '../components/404'
-import PrivateComponent from '../components/private-route'
+import PrivateComponent from '../components/private-component'
 
 import Startup from './startup'
 
