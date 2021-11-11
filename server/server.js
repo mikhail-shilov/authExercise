@@ -156,7 +156,11 @@ if (config.isSocketsEnabled) {
     // console.log('connection is!', connections)
     // console.log(`${connections.length} items of connections`)
 
-    conn.on('data', async () => {
+    conn.on('data', async (data) => {
+      console.log('new message', data)
+      connections.forEach((connection) => {
+        connection.write("ws: " + data)
+      })
     })
 
     conn.on('close', () => {
