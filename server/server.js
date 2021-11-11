@@ -14,7 +14,6 @@ import auth from './middleware/auth'
 import mongooseService from './services/mongoose'
 import User from './model/User.model'
 
-
 import config from './config'
 import Html from '../client/html'
 
@@ -42,7 +41,8 @@ try {
 }
 
 let connections = []
-
+console.log('config', config)
+console.log('env', process.env)
 const port = process.env.PORT || 8090
 const server = express()
 
@@ -86,6 +86,8 @@ server.post('/api/v1/auth', async (req, res) => {
 })
 
 server.get('/api/v1/auth', async (req, res) => {
+  console.log('connections', connections)
+
   try {
     const jwtUser = jwt.verify(req.cookies.token, config.secret)
     const userRecord = await User.findById(jwtUser.uid)
@@ -93,8 +95,8 @@ server.get('/api/v1/auth', async (req, res) => {
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
     // const { password, ...user } = userRecord
     const user = { id: userRecord.id, email: userRecord.email }
-    console.log(user)
-    console.log(user)
+    console.log('user',user)
+    console.log('userRecord',userRecord)
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
@@ -139,6 +141,8 @@ server.get('/*', (req, res) => {
 
 const app = server.listen(port)
 
+console.log('config.isSocketsEnabled', config.isSocketsEnabled)
+console.log('config.isSocketsEnabled', process.env.ENABLE_SOCKETS)
 if (config.isSocketsEnabled) {
   const echo = sockjs.createServer()
   echo.on('connection', (conn) => {
