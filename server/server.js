@@ -41,8 +41,6 @@ try {
 }
 
 let connections = []
-console.log('config', config)
-console.log('env', process.env)
 const port = process.env.PORT || 8090
 const server = express()
 
@@ -94,6 +92,7 @@ server.get('/api/v1/auth', async (req, res) => {
     const payload = { uid: userRecord.id }
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
     // const { password, ...user } = userRecord
+    connections.forEach((connection) => connection.write('fsdfsdfsdf'))
     const user = { id: userRecord.id, email: userRecord.email }
     console.log('user',user)
     console.log('userRecord',userRecord)
@@ -107,6 +106,14 @@ server.get('/api/v1/auth', async (req, res) => {
 
 server.get('/api/v1/user-info', auth(['user']), (req, res) => {
   res.json({ status: 'pass' })
+})
+
+server.post('/api/v1/msg', (req, res) => {
+  connections.forEach((connection) => {
+    connection.write(req.body.message)
+  })
+  console.log(connections)
+  res.json({ added: req.body.message})
 })
 
 server.use('/api/', (req, res) => {
@@ -141,12 +148,14 @@ server.get('/*', (req, res) => {
 
 const app = server.listen(port)
 
-console.log('config.isSocketsEnabled', config.isSocketsEnabled)
-console.log('config.isSocketsEnabled', process.env.ENABLE_SOCKETS)
 if (config.isSocketsEnabled) {
   const echo = sockjs.createServer()
   echo.on('connection', (conn) => {
+
     connections.push(conn)
+    // console.log('connection is!', connections)
+    // console.log(`${connections.length} items of connections`)
+
     conn.on('data', async () => {
     })
 
