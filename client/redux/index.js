@@ -23,17 +23,18 @@ const composedEnhancers = composeFunc(applyMiddleware(...middleware), ...enhance
 const store = createStore(rootReducer(history), initialState, composedEnhancers)
 let socket
 
+const ENABLE_SOCKETS = true
 if (typeof ENABLE_SOCKETS !== 'undefined' && ENABLE_SOCKETS) {
   const initSocket = () => {
     socket = new SockJS(`${isBrowser ? window.location.origin : 'http://localhost'}/ws`)
-
+    console.log('Socket connect')
     socket.onopen = () => {
       store.dispatch(socketActions.connected)
     }
 
     socket.onmessage = (message) => {
       // eslint-disable-next-line no-console
-      console.log(message)
+      console.log(message.data)
 
       // socket.close();
     }

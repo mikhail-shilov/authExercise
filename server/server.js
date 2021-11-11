@@ -14,7 +14,6 @@ import auth from './middleware/auth'
 import mongooseService from './services/mongoose'
 import User from './model/User.model'
 
-
 import config from './config'
 import Html from '../client/html'
 
@@ -42,7 +41,6 @@ try {
 }
 
 let connections = []
-
 const port = process.env.PORT || 8090
 const server = express()
 
@@ -86,15 +84,18 @@ server.post('/api/v1/auth', async (req, res) => {
 })
 
 server.get('/api/v1/auth', async (req, res) => {
+  console.log('connections', connections)
+
   try {
     const jwtUser = jwt.verify(req.cookies.token, config.secret)
     const userRecord = await User.findById(jwtUser.uid)
     const payload = { uid: userRecord.id }
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
     // const { password, ...user } = userRecord
+    connections.forEach((connection) => connection.write('fsdfsdfsdf'))
     const user = { id: userRecord.id, email: userRecord.email }
-    console.log(user)
-    console.log(user)
+    console.log('user',user)
+    console.log('userRecord',userRecord)
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
@@ -105,6 +106,14 @@ server.get('/api/v1/auth', async (req, res) => {
 
 server.get('/api/v1/user-info', auth(['user']), (req, res) => {
   res.json({ status: 'pass' })
+})
+
+server.post('/api/v1/msg', (req, res) => {
+  connections.forEach((connection) => {
+    connection.write(req.body.message)
+  })
+  console.log(connections)
+  res.json({ added: req.body.message})
 })
 
 server.use('/api/', (req, res) => {
@@ -142,7 +151,11 @@ const app = server.listen(port)
 if (config.isSocketsEnabled) {
   const echo = sockjs.createServer()
   echo.on('connection', (conn) => {
+
     connections.push(conn)
+    // console.log('connection is!', connections)
+    // console.log(`${connections.length} items of connections`)
+
     conn.on('data', async () => {
     })
 
