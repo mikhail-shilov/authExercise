@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import config from '../config'
 
 mongoose.connection.on('connected', () => {
-  console.log('database is connected')
+//  console.log('database is connected')
 })
 
 mongoose.connection.on('error', (err) => {

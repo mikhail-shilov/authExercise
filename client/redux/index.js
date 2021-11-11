@@ -31,10 +31,10 @@ if (typeof ENABLE_SOCKETS !== 'undefined' && ENABLE_SOCKETS) {
       store.dispatch(socketActions.connected)
     }
 
-    socket.onmessage = (message) => {
+    socket.onmessage = (data) => {
       // eslint-disable-next-line no-console
-      console.log(message)
-
+      console.log(data)
+      // console.log(JSON.stringify(data))
       // socket.close();
     }
 

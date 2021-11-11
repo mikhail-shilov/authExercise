@@ -33,7 +33,7 @@ password: 'test'
 
 user.save()
  */
-
+console.log('Test msg')
 try {
   // eslint-disable-next-line import/no-unresolved
   Root = require('../dist/assets/js/ssr/root.bundle').default
@@ -49,10 +49,10 @@ const server = express()
 const middleware = [
   cors(),
   passport.initialize(),
+  cookieParser(),
   express.static(path.resolve(__dirname, '../dist/assets')),
   express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }),
   express.json({ limit: '50mb', extended: true }),
-  cookieParser()
 ]
 passport.use('jwt', passportJWT.jwt)
 
@@ -76,9 +76,15 @@ server.post('/api/v1/auth', async (req, res) => {
     const userRecord = await User.findAndValidateUser(req.body)
     const payload = { uid: userRecord.id }
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
+    /*
+    connections.forEach((connection) => {
+      // JSON.stringify({type: 'SHOW_MESSAGE', message: 'Some user logged on!'})
+      connection.write(JSON.stringify({ message: 'Testing sockets. User connected' }))
+    })
+    */
     const user = { id: userRecord.id, email: userRecord.email }
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
-    res.json({ status: 'ok', token, user })
+    res.json({ status: 'ok', token, user,connections })
   } catch (err) {
     console.log(err)
     res.json({ status: 'error', err })
@@ -86,6 +92,8 @@ server.post('/api/v1/auth', async (req, res) => {
 })
 
 server.get('/api/v1/auth', async (req, res) => {
+  console.log('user')
+
   try {
     const jwtUser = jwt.verify(req.cookies.token, config.secret)
     const userRecord = await User.findById(jwtUser.uid)
@@ -93,8 +101,6 @@ server.get('/api/v1/auth', async (req, res) => {
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
     // const { password, ...user } = userRecord
     const user = { id: userRecord.id, email: userRecord.email }
-    console.log(user)
-    console.log(user)
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
@@ -104,6 +110,7 @@ server.get('/api/v1/auth', async (req, res) => {
 })
 
 server.get('/api/v1/user-info', auth(['user']), (req, res) => {
+  console.log('UserInfo request')
   res.json({ status: 'pass' })
 })
 

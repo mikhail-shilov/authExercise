@@ -18,9 +18,11 @@ const handleJWT = (req, res, next, requiredRoles) => {
 
 const auth = (requiredRoles = []) => {
   return (req, res, next) => {
-    return passport.authenticate('jwt',
+    return passport.authenticate(
+      'jwt',
       { session: true },
-      handleJWT(req, res, next, requiredRoles))(req, res, next)
+      handleJWT(req, res, next, requiredRoles)
+    )(req, res, next)
   }
 }
 
