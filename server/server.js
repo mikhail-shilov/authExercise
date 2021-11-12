@@ -91,8 +91,6 @@ server.get('/api/v1/auth', async (req, res) => {
     const payload = { uid: userRecord.id }
     const token = jwt.sign(payload, config.secret, { expiresIn: '48h' })
     const user = { id: userRecord.id, email: userRecord.email }
-    console.log('user', user)
-    console.log('userRecord', userRecord)
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
@@ -109,7 +107,6 @@ server.post('/api/v1/msg', (req, res) => {
   connections.forEach((connection) => {
     connection.write(req.body.message)
   })
-  console.log(connections)
   res.json({ added: req.body.message })
 })
 

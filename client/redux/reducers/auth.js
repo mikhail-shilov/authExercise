@@ -70,7 +70,7 @@ export function tryUserInfo() {
     fetch('/api/v1/user-info')
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
+        console.log('User-info access:', data.status)
       })
   }
 }
