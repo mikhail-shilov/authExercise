@@ -9,13 +9,12 @@ const Private = () => {
   const [nickName, setNickName] = useState('Username')
   const [chatMessage, setChatMessage] = useState('')
 
-  const sendHandler = ()=> {
+  const sendHandler = () => {
     const socket = getSocket()
     const msg = `#${nickName}>> ${chatMessage}`
     setChatMessage('')
     socket.send(msg)
   }
-
 
   return (
     <div>
